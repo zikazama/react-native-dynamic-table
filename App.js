@@ -17,6 +17,7 @@ import {
   useColorScheme,
   View,
   TouchableOpacity,
+  Dimensions,
   Alert,
 } from 'react-native';
 
@@ -44,7 +45,8 @@ class TableView extends Component {
   constructor(props) {
     super(props);
     this.state = {
-      tableHead: ['Buku', 'Baru', 'Second', 'Rusak', 'N/A'],
+      tableHead: ['Buku', 'Baru', 'Second', 'Bekas', 'Rusak', 'N/A'],
+      dataColumn: [[false, false, false, false, false, false]],
       tableData: customData.data,
     };
   }
@@ -55,20 +57,48 @@ class TableView extends Component {
 
   render() {
     const state = this.state;
-    const element = (data, rowIndex, cellIndex) => (
+    const element = (data, rowIndex, cellIndex, type) => (
       <CheckBox
         style={{flex: 1, padding: 10}}
         onClick={() => {
-          let temp = this.state.tableData;
-          temp[rowIndex].map((check, index) => {
-            if (index > 0) {
-              temp[rowIndex][index] = false;
-            }
-          });
-          temp[rowIndex][cellIndex] = !data;
-          this.setState({
-            tableData: temp,
-          });
+          if (type === 1) {
+            let temp = this.state.dataColumn;
+            let temp2 = this.state.tableData;
+            temp[rowIndex].map((check, index) => {
+              if (index > 0) {
+                temp[rowIndex][index] = false;
+              }
+            });
+            temp2.map((check, index) => {
+              check.map((check2, index2) => {
+                if (index2 > 0) {
+                  temp2[index][index2] = false;
+                }
+              });
+            });
+            temp2.map((check, index) => {
+              check.map((check2, index2) => {
+                if (index2 === cellIndex) {
+                  temp2[index][index2] = !data;
+                }
+              });
+            });
+            temp[rowIndex][cellIndex] = !data;
+            this.setState({
+              dataColumn: temp,
+            });
+          } else {
+            let temp = this.state.tableData;
+            temp[rowIndex].map((check, index) => {
+              if (index > 0) {
+                temp[rowIndex][index] = false;
+              }
+            });
+            temp[rowIndex][cellIndex] = !data;
+            this.setState({
+              tableData: temp,
+            });
+          }
         }}
         isChecked={data}
       />
@@ -77,11 +107,36 @@ class TableView extends Component {
     return (
       <View onScroll={this.handleScroll} style={styles.container}>
         <Table borderStyle={{borderColor: 'transparent'}}>
-          <Row
-            data={state.tableHead}
-            style={styles.head}
-            textStyle={styles.text}
-          />
+          <ScrollView>
+            <TableWrapper style={styles.rowHead}>
+              {state.tableHead.map((cellData, cellIndex) => (
+                <Cell
+                  key={cellIndex}
+                  data={cellData}
+                  textStyle={styles.textHead}
+                  style={cellIndex === 0 ? {flex: 2} : {flex: 1}}
+                />
+              ))}
+            </TableWrapper>
+          </ScrollView>
+          <ScrollView>
+            {state.dataColumn.map((rowData, index) => (
+              <TableWrapper key={index} style={styles.rowHead}>
+                {rowData.map((cellData, cellIndex) => (
+                  <Cell
+                    key={cellIndex}
+                    data={
+                      cellIndex > 0
+                        ? element(cellData, index, cellIndex, 1)
+                        : cellData
+                    }
+                    textStyle={styles.text}
+                    style={cellIndex === 0 ? {flex: 2} : {flex: 1}}
+                  />
+                ))}
+              </TableWrapper>
+            ))}
+          </ScrollView>
           <ScrollView>
             {state.tableData.map((rowData, index) => (
               <TableWrapper key={index} style={styles.row}>
@@ -89,14 +144,12 @@ class TableView extends Component {
                   <Cell
                     key={cellIndex}
                     data={
-                      cellIndex === 1 ||
-                      cellIndex === 2 ||
-                      cellIndex === 3 ||
-                      cellIndex === 4
-                        ? element(cellData, index, cellIndex)
+                      cellIndex > 0
+                        ? element(cellData, index, cellIndex, 2)
                         : cellData
                     }
                     textStyle={styles.text}
+                    style={cellIndex === 0 ? {flex: 2} : {flex: 1}}
                   />
                 ))}
               </TableWrapper>
@@ -137,12 +190,14 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
     paddingTop: 30,
-    height: 750,
+    height: Dimensions.get('window').height * 0.8,
     backgroundColor: '#fff',
   },
   head: {height: 40, backgroundColor: '#808B97'},
-  text: {margin: 6},
+  textHead: {textAlign: 'center'},
+  text: {margin: 6, textAlign: 'center'},
   row: {flexDirection: 'row', backgroundColor: '#FFF1C1'},
+  rowHead: {flexDirection: 'row', backgroundColor: '#808B97'},
   btn: {width: 58, height: 18, backgroundColor: '#78B7BB', borderRadius: 2},
   btnText: {textAlign: 'center', color: '#fff'},
 });
