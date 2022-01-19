@@ -7,6 +7,8 @@
  */
 import customData from './data.json';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 import React, {Component, Node} from 'react';
 import {
   SafeAreaView,
@@ -106,6 +108,21 @@ class TableView extends Component {
 
     return (
       <View onScroll={this.handleScroll} style={styles.container}>
+        <View
+          style={{
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}>
+          <Text
+            style={{
+              fontSize: 20,
+              marginBottom:20,
+            }}>
+            Foto Tampak Depan
+          </Text>
+          <Icon name="camera" size={90} color="#900" />
+          <Icon name="plus" size={30} color="#900" />
+        </View>
         <Table borderStyle={{borderColor: 'transparent'}}>
           <ScrollView>
             <TableWrapper style={styles.rowHead}>
